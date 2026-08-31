@@ -1,0 +1,226 @@
+# CI for terraform-aws-skill-workbench.
+#
+# Cost, since this repository is public: Actions minutes on standard GitHub-hosted runners
+# are free for public repositories, so the arithmetic below is not about parallelism. The
+# things that actually cost money are, in order:
+#
+#   1. Larger runners. Those are billed even on a public repository. Every job here pins
+#      ubuntu-latest, which is a standard runner. Do not change that to a larger label.
+#   2. A hung job. The default job timeout is 360 minutes, so one wedged step can burn six
+#      hours of runner time. Every job below sets timeout-minutes well under that.
+#   3. Runs nobody is waiting for. `concurrency` cancels a run as soon as a newer commit
+#      arrives on the same ref, and the push trigger is filtered to main so that pushing a
+#      branch with an open pull request runs the workflow once rather than twice.
+#
+# One more, worth writing down because it is invisible until it happens: if this repository
+# is ever made private, everything here starts billing against the account's minutes.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only by default. Exactly one job below widens this, and only to what it needs.
+permissions:
+  contents: read
+
+env:
+  # Pinned for the same reason the Terraform module version is pinned: a lint or docs tool
+  # that floats turns an unrelated commit into a red build.
+  TERRAFORM_VERSION: 1.15.4
+  TERRAFORM_DOCS_VERSION: 0.24.0
+  RUFF_VERSION: 0.14.5
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          # The wrapper rewrites stdout, which breaks anything that reads command output.
+          terraform_wrapper: false
+
+      - uses: terraform-linters/setup-tflint@90f302c255ef959cbfb4bd10581afecdb7ece3e6 # v4
+        with:
+          tflint_version: latest
+
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Passes here even though it fails locally: the only offender is examples/local,
+      # which is gitignored and therefore does not exist in a clean checkout.
+      - name: Terraform formatting
+        run: make fmt-check
+
+      - name: Terraform validate
+        run: |
+          make validate
+          make validate-modules
+          make validate-examples
+
+      - name: tflint
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make lint
+
+      # Lint only. `ruff format` is deliberately not run: it would rewrite all three Python
+      # files in this repository, which is a decision about house style rather than a check.
+      - name: ruff
+        run: uvx ruff@${{ env.RUFF_VERSION }} check lambda tests
+
+      # This is the type gate, not a lint gate. See the note about ESLint in the pull
+      # request that added this file: eslint is neither installed nor configured here, so
+      # there is nothing for it to run against yet.
+      - name: Frontend type-check and build
+        run: make frontend-check
+
+      - name: terraform-docs
+        run: |
+          curl -sSLo /tmp/terraform-docs.tar.gz \
+            "https://terraform-docs.io/dl/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
+          tar -xzf /tmp/terraform-docs.tar.gz -C /tmp terraform-docs
+          sudo install -m 0755 /tmp/terraform-docs /usr/local/bin/terraform-docs
+          make docs-check
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      # 3.13 because that is the runtime proxy.tf configures. Testing the handler on a
+      # different minor than it runs on is a gap that only shows up as a production-only bug.
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Proxy Lambda unit tests
+        run: make test
+
+      - name: Terraform plan-only tests
+        run: make test-tf
+
+  scan:
+    name: Security scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      # Uploading SARIF to code scanning. Free here only because the repository is public;
+      # on a private repository this needs GitHub Advanced Security.
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # ASH is fetched with uvx and pins itself to ASH_VERSION in the Makefile. Caching uv
+      # is what keeps this job from re-downloading every scanner on every run.
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          enable-cache: true
+
+      - name: ASH
+        run: make scan
+
+      # always(), because the interesting case is the one where the scan just failed. ASH
+      # exits 2 on a finding at or above ASH_MIN_SEVERITY, and the findings are the reason
+      # to look. ash.ghas.sarif rather than ash.sarif: the GHAS reporter excludes findings
+      # ASH suppressed, so the Security tab shows what is actionable rather than everything
+      # the repository has already argued about in .ash/.ash.yaml.
+      - name: Upload SARIF
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@6f5948dfacef28e207b48d0905cf90c03365536d # v3
+        with:
+          sarif_file: .ash/ash_output/reports/ash.ghas.sarif
+          category: ash
+
+      - name: Upload scan reports
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ash-reports
+          path: .ash/ash_output/reports/
+          retention-days: 7
+
+  docs:
+    name: Commit generated docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Only after the rest is green, and only on main. Never on a pull request: a fork's
+    # token is read-only regardless of what is requested here, so this would fail rather
+    # than do something useful, and pushing to a contributor's branch is a surprise nobody
+    # asked for. Pull requests are covered by `make docs-check` in the lint job, which
+    # fails when the tables are stale.
+    needs: [lint, test, scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+
+      - name: Install terraform-docs
+        run: |
+          curl -sSLo /tmp/terraform-docs.tar.gz \
+            "https://terraform-docs.io/dl/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
+          tar -xzf /tmp/terraform-docs.tar.gz -C /tmp terraform-docs
+          sudo install -m 0755 /tmp/terraform-docs /usr/local/bin/terraform-docs
+
+      - name: Regenerate README tables
+        run: make docs
+
+      # No recursion guard is needed and none is used: a push authenticated with
+      # GITHUB_TOKEN does not trigger workflow runs, which is a GitHub rule rather than a
+      # convention. HEAD:$REF_NAME rather than a bare push because checkout leaves the work
+      # tree on a detached HEAD — and via env rather than ${{ }} because a ${{ }} expansion
+      # inside a run block is substituted into the script before the shell sees it, so a ref
+      # containing shell metacharacters would execute rather than be quoted.
+      - name: Commit if changed
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -z "$(git status --porcelain README.md)" ]; then
+            echo "README tables already current, nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: regenerate terraform-docs tables"
+          git push origin "HEAD:${REF_NAME}"

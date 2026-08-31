@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/awslabs/automated-security-helper/refs/heads/main/automated_security_helper/schemas/AshConfig.json
+#
+# ASH configuration for `make scan`. Everything here narrows the scan to code this
+# repository is responsible for; nothing here disables a scanner.
+
+project_name: terraform-aws-skill-workbench
+
+global_settings:
+  severity_threshold: MEDIUM
+
+  ignore_paths:
+    - path: '**/.terraform/**'
+      reason: 'Downloaded provider plugins and the vendored source of terraform-aws-modules/lambda/aws.'
+
+  suppressions:
+    - rule_id: 'B101'
+      path: 'tests/*'
+      reason: 'assert is how pytest states an assertion. B101 exists because assert is stripped under python -O, which is not how a test suite is run.'
+
+    # Declined rather than deferred. CKV_AWS_144 asks for cross-region replication on the
+    # skill bucket, which is a durability control and not a security one.
+    - rule_id: 'CKV_AWS_144'
+      path: 'modules/s3-bucket/main.tf'
+      reason: 'Cross-region replication is a durability control, not a security one, and this bucket holds re-creatable content: force_destroy is true and noncurrent versions expire after 30 days. Replication would double storage cost and put skill content in a second region. Revisit if the bucket ever holds something not re-creatable from source.'

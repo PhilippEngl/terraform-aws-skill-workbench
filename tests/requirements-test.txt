@@ -1,0 +1,13 @@
+# Test dependencies for the skill workbench proxy.
+#
+# boto3 is here because importing handler.py constructs two clients at module scope, and
+# is deliberately unpinned to match the Lambda runtime, which supplies its own. Pinning
+# only here would mean testing against a different SDK than the function runs on.
+boto3
+pytest>=8,<9
+
+# Pinned exactly, unlike boto3 above, and for the opposite reason: the Lambda runtime does
+# not supply Powertools, so the function ships its own copy at the version in
+# lambda/proxy/requirements.txt. Testing against a different one would test a function that
+# does not exist. Bump both together.
+aws-lambda-powertools==3.34.0

@@ -1,0 +1,40 @@
+# Pinning every action to a commit SHA is only half a supply-chain control: the other half
+# is noticing when the pin is stale. Dependabot updates a SHA pin in place and keeps the
+# trailing "# v4" comment in step, which is the reason the pins are written that way.
+#
+# Monthly rather than weekly, and grouped rather than one pull request per action, because
+# each pull request costs a full CI run and this repository has four jobs.
+#
+# The cooldown is the part worth understanding. Without it, Dependabot proposes a release
+# the day it appears, which is exactly the window in which a compromised release is still
+# unnoticed — the npm and action compromises that have mattered were yanked within days of
+# publication. Waiting is close to free here: nothing in this repository needs a dependency
+# the week it ships, and a genuine security release arrives through an advisory rather than
+# through a routine version bump.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # The frontend's lock file is what npm-audit reads during make scan, so a stale lock is a
+  # scanner blind spot rather than only a missed upgrade.
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+      # A major version is a bigger change to review and a bigger surface for a bad release,
+      # so it waits longer.
+      semver-major-days: 30
+    groups:
+      frontend:
+        patterns: ["*"]

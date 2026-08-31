@@ -1,0 +1,17 @@
+# Runtime dependencies for the proxy Lambda, installed into the deployment package at
+# build time by terraform-aws-modules/lambda/aws with pip_requirements = true.
+#
+# Both are pinned exactly rather than floored. A deployment package is an artefact: two
+# applies of the same commit should produce the same bytes, and a floating range means the
+# function silently changes when someone re-applies months later.
+#
+# boto3 is pinned rather than left to the Lambda runtime, which supplies its own. The
+# runtime's copy lags, and this function calls bedrock-agentcore APIs whose model is
+# moving weekly — a stale botocore rejects valid parameters client-side, before signing,
+# with a ParamValidationError that names the parameter but not the cause. /var/task
+# precedes /var/runtime on the path, so this copy wins.
+#
+# Both are pure Python, so no native wheels are built and build_in_docker is unnecessary
+# even though the function targets arm64.
+boto3==1.43.82
+aws-lambda-powertools==3.34.0

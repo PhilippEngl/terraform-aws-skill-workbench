@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars and replace the placeholders. terraform.tfvars is gitignored;
+# this file is not, so keep account-specific values out of it.
+
+aws_region  = "eu-central-1"
+name_prefix = "demo"
+
+vpc_id = "vpc-0123456789abcdef0"
+
+private_subnet_ids = [
+  "subnet-0123456789abcdef0",
+  "subnet-0123456789abcdef1",
+]
+
+agent_model_id             = "eu.anthropic.claude-sonnet-4-6"
+additional_agent_model_ids = ["eu.anthropic.claude-haiku-4-5"]

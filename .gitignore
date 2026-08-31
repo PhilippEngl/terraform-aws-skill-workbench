@@ -1,0 +1,52 @@
+# Terraform state — may contain secrets, never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+crash.*.log
+
+# Variable files may carry values specific to one account
+*.tfvars
+*.tfvars.json
+!examples/*/terraform.tfvars.example
+examples/local
+
+# Plan output
+tfplan
+*.tfplan
+
+# Local provider overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+.terraform.lock.hcl
+examples/*/.terraform.lock.hcl
+
+# Lambda packages produced by the archive_file data source
+.build/
+
+# Frontend
+node_modules/
+dist/
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# ASH scan output. Only the output — .ash/ also holds the config, which is committed
+# if the repository has one.
+.ash/ash_output/
+
+# OS and editor
+.DS_Store
+*.swp
+*~

@@ -1,0 +1,22 @@
+# Copy to terraform.tfvars and replace the placeholders. terraform.tfvars is gitignored;
+# this file is not, so keep account-specific values out of it.
+
+aws_region  = "eu-central-1"
+name_prefix = "demo"
+
+vpc_id = "vpc-0123456789abcdef0"
+
+private_subnet_ids = [
+  "subnet-0123456789abcdef0",
+  "subnet-0123456789abcdef1",
+]
+
+# One per availability zone, usually. Find them with:
+#   aws ec2 describe-route-tables --filters Name=vpc-id,Values=<vpc-id> \
+#     --query 'RouteTables[].RouteTableId'
+private_route_table_ids = [
+  "rtb-0123456789abcdef0",
+  "rtb-0123456789abcdef1",
+]
+
+agent_model_id = "eu.anthropic.claude-sonnet-4-6"

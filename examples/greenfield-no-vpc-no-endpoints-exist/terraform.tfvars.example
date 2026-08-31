@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars and replace the placeholders. terraform.tfvars is gitignored;
+# this file is not, so keep account-specific values out of it.
+#
+# terraform.tfvars is gitignored; this file is not, so keep account-specific values out.
+
+aws_region  = "eu-central-1"
+name_prefix = "demo"
+
+# The VPC this example creates. Nothing else uses it, so the default rarely needs changing
+# unless you intend to peer it with something.
+vpc_cidr = "10.2.0.0/16"
+
+# Must exist in aws_region, and the geo prefix must match its geography. Enable model
+# access in the Bedrock console for this model before applying.
+agent_model_id = "eu.anthropic.claude-sonnet-4-6"
