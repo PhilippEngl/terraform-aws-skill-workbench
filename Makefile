@@ -1,14 +1,15 @@
 # Task runner for terraform-aws-skill-workbench.
 #
-# Targets that read Terraform outputs use TF_DIR, which defaults to the complete
-# example. Point it at your own root configuration:
+# Targets that read Terraform outputs use TF_DIR, which defaults to the example
+# assuming a VPC that already has the endpoints. Point it at your own root
+# configuration:
 #
 #   make frontend TF_DIR=../my-infra
 
 TF      ?= terraform
 TFLINT  ?= tflint
 PYTHON  ?= python3
-TF_DIR  ?= examples/complete
+TF_DIR  ?= examples/vpc-and-endpoints-already-exist
 MODULE_ADDRESS ?= module.skill_workbench
 TEST_VENV ?= .venv
 
@@ -17,7 +18,7 @@ EXAMPLES     := $(wildcard examples/*)
 
 .DEFAULT_GOAL := help
 .PHONY: help fmt fmt-check validate validate-modules validate-examples test test-tf \
-        lint docs check-public scan scan-container scan-report \
+        lint docs docs-check scan scan-container scan-report \
         frontend-install frontend-check frontend-serve \
         frontend-dev frontend-env frontend user refresh-service-model clean
 

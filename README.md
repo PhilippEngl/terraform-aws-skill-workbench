@@ -6,8 +6,8 @@ You write a `SKILL.md` in the browser, save it, and immediately ask the agent to
 
 ## What it creates
 
-- An **AgentCore harness** in VPC mode, with managed long-term memory, the built-in file operations tool and the managed browser tool. `shell` is deliberately excluded — see [ADR 3](docs/adr/0003-shell-is-excluded.md).
-- A **proxy Lambda** that is the security boundary. The browser can invoke this function and nothing else; every skill read, write and agent invocation goes through it. See [ADR 1](docs/adr/0001-two-prefixes-and-a-constructing-proxy.md).
+- An **AgentCore harness** in VPC mode, with managed long-term memory, the built-in file operations tool and the managed browser tool. `shell` is deliberately excluded: the workbench exists to exercise Skills, and a skill that can shell out can read the shared prefix and exfiltrate it.
+- A **proxy Lambda** that is the security boundary. The browser can invoke this function and nothing else; every skill read, write and agent invocation goes through it.
 - An **S3 bucket with two prefixes**: `users/<identity>/` for skills a person authors, `shared/` for skills Terraform manages. A user can never read `shared/` directly, only observe its effect on the agent.
 - A **KMS key** encrypting both the bucket and the harness's memory.
 - **Cognito** user pool, client, identity pool, and an authenticated role holding exactly one permission.
@@ -40,11 +40,11 @@ module "skill_workbench" {
   vpc_id             = "vpc-0123456789abcdef0"
   private_subnet_ids = ["subnet-0123456789abcdef0", "subnet-0123456789abcdef1"]
 
-  agent_model_id = "us.anthropic.claude-sonnet-4-6"
+  agent_model_id = "eu.anthropic.claude-sonnet-5-0"
 }
 ```
 
-Two worked examples: [`examples/complete`](examples/complete) for a VPC that already has the endpoints, and [`examples/greenfield`](examples/greenfield) for one that does not. Both are templates with placeholder identifiers.
+Three worked examples, named after the precondition they assume. [`examples/vpc-and-endpoints-already-exist`](examples/vpc-and-endpoints-already-exist) is the normal case in an organisation where a platform team owns the network; it is a template with placeholder identifiers. [`examples/only-vpc-exists`](examples/only-vpc-exists) has the module create the endpoints and the S3 gateway endpoint into a VPC you already have. [`examples/greenfield-no-vpc-no-endpoints-exist`](examples/greenfield-no-vpc-no-endpoints-exist) builds the network itself and is the only one that applies as written with nothing to substitute.
 
 ### `terraform apply` is not the whole install
 
@@ -55,7 +55,7 @@ make user       # create a Cognito user, interactively
 make frontend   # build the React app and upload it to Amplify
 ```
 
-Both read Terraform outputs from `TF_DIR`, which defaults to `examples/complete`. Point it at your own root configuration:
+Both read Terraform outputs from `TF_DIR`, which defaults to `examples/vpc-and-endpoints-already-exist`. Point it at your own root configuration:
 
 ```sh
 make frontend TF_DIR=../my-infra
@@ -82,7 +82,6 @@ make test                # the proxy Lambda's unit tests
 make test-tf             # plan-only Terraform assertions, provider mocked
 make frontend-check      # type-check and production build
 make frontend-serve      # serve the UI on localhost:5173, layout only
-make check-public        # scan for content that should not be published
 make lint                # tflint, if installed
 make docs                # regenerate the tables below
 ```
@@ -110,7 +109,7 @@ Local mode runs only what uv can install. cfn-nag needs Ruby, and Grype and Syft
 
 What is in scope is narrowed by [`.ash/.ash.yaml`](.ash/.ash.yaml), and the reason is worth knowing: ASH does not honour `.gitignore` for `.terraform/`, so without that file most findings come from the vendored source of `terraform-aws-modules/lambda/aws`, once per example that has been initialised. Nothing in it disables a scanner. Output lands in the gitignored `.ash/ash_output/`, and `make clean` removes it.
 
-Everything else above runs offline. The targets that touch AWS act on a **root configuration**, not on the module — a module is never applied directly. `TF_DIR` selects which one and defaults to `examples/complete`:
+Everything else above runs offline. The targets that touch AWS act on a **root configuration**, not on the module — a module is never applied directly. `TF_DIR` selects which one and defaults to `examples/vpc-and-endpoints-already-exist`:
 
 ```sh
 make plan                        # terraform plan in TF_DIR
