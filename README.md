@@ -35,7 +35,7 @@ Four things the module cannot check for you:
 
 ```hcl
 module "skill_workbench" {
-  source = "github.com/your-org/terraform-aws-skill-workbench?ref=v0.1.0"
+  source = "github.com/your-org/terraform-aws-skill-workbench"
 
   name_prefix = "demo"
 
