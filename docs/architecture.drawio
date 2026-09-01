@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Icon conventions, verified against draw.io's own AWS4 palette definition
+  (jgraph/drawio: src/main/webapp/js/diagramly/sidebar/Sidebar-AWS4.js):
+
+    Service icons  -> coloured rounded-square tile:
+                      shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.<service>
+    Resource icons -> flat glyph: shape=mxgraph.aws4.<resource>
+
+  Official category fills used below, taken from that file rather than guessed:
+    Storage            #7AA116   Compute              #ED7100
+    Security/Identity  #DD344C   Networking (VPC)     #8C4FFF
+    Machine learning   #01A88D   Management/Gov       #E7157B
+    General resources  #1E262E   Front-end web/mobile #DD344C
+
+  Note mxgraph.aws4.endpoint is the API Gateway Endpoint icon. The VPC one is
+  mxgraph.aws4.endpoints, plural.
+-->
+<mxfile host="app.diagrams.net">
+  <diagram id="skill-workbench-arch" name="Skill Workbench Architecture">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="terraform-aws-skill-workbench — module architecture" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=20;fontStyle=1;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="170" y="0" width="700" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g_cloud" value="AWS Cloud" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="170" y="40" width="1350" height="920" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g_vpc" value="VPC (private subnets, NAT route)" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc2;strokeColor=#8C4FFF;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#8C4FFF;dashed=0;" vertex="1" parent="g_cloud">
+          <mxGeometry x="250" y="50" width="640" height="820" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g_sg_lambda" value="Lambda SG" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;strokeColor=#DD344C;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#DD344C;dashed=0;" vertex="1" parent="g_vpc">
+          <mxGeometry x="30" y="240" width="200" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g_sg_harness" value="Harness SG (service-owned ENIs)" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;strokeColor=#DD344C;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#DD344C;dashed=0;" vertex="1" parent="g_vpc">
+          <mxGeometry x="280" y="240" width="330" height="200" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g_sg_endpoints" value="Endpoints SG — egress-only path out of VPC mode" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_security_group;strokeColor=#DD344C;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#DD344C;dashed=0;" vertex="1" parent="g_vpc">
+          <mxGeometry x="30" y="510" width="580" height="230" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dev" value="Developer&lt;br&gt;(browser)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#1E262E;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.user;" vertex="1" parent="1">
+          <mxGeometry x="50" y="420" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tf" value="Terraform&lt;br&gt;(operator machine)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#1E262E;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.client;" vertex="1" parent="1">
+          <mxGeometry x="44" y="700" width="60" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="internet" value="Public web&lt;br&gt;(browser tool)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.internet_gateway;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="690" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="amplify" value="Amplify&lt;br&gt;(serves React app)" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.amplify;" vertex="1" parent="g_cloud">
+          <mxGeometry x="54" y="74" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cognito" value="Cognito&lt;br&gt;user + identity pool" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cognito;" vertex="1" parent="g_cloud">
+          <mxGeometry x="54" y="254" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="iam" value="Authenticated role&lt;br&gt;ONE permission" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management;" vertex="1" parent="g_cloud">
+          <mxGeometry x="54" y="424" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lambda" value="Proxy Lambda&lt;br&gt;SECURITY BOUNDARY" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.lambda_function;" vertex="1" parent="g_sg_lambda">
+          <mxGeometry x="46" y="70" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="harness" value="AgentCore harness&lt;br&gt;VPC mode + memory&lt;br&gt;file_operations, browser" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="g_sg_harness">
+          <mxGeometry x="54" y="64" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ep_if" value="Interface endpoints&lt;br&gt;ecr.api, ecr.dkr, logs" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.endpoints;" vertex="1" parent="g_sg_endpoints">
+          <mxGeometry x="50" y="80" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ep_s3" value="S3 gateway&lt;br&gt;endpoint" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.endpoints;" vertex="1" parent="g_sg_endpoints">
+          <mxGeometry x="230" y="80" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nat" value="NAT gateway&lt;br&gt;(caller-owned)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.nat_gateway;" vertex="1" parent="g_sg_endpoints">
+          <mxGeometry x="420" y="80" width="48" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3" value="Skill bucket&lt;br&gt;users/ and shared/" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="g_cloud">
+          <mxGeometry x="1030" y="100" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="kms" value="KMS key&lt;br&gt;bucket + memory" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.key_management_service;" vertex="1" parent="g_cloud">
+          <mxGeometry x="1030" y="284" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="model" value="Bedrock model&lt;br&gt;agent_model_id" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="g_cloud">
+          <mxGeometry x="1030" y="474" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cw" value="CloudWatch Logs&lt;br&gt;identity to key audit" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch_2;" vertex="1" parent="g_cloud">
+          <mxGeometry x="1030" y="664" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_dev_amplify" value="Loads app" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#8C4FFF;fontSize=10;fontColor=#8C4FFF;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="dev" target="amplify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_dev_cognito" value="Sign in" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#DD344C;fontSize=10;fontColor=#DD344C;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="dev" target="cognito">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_cognito_iam" value="Issues credentials" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#DD344C;fontSize=10;fontColor=#DD344C;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="cognito" target="iam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_dev_lambda" value="InvokeFunction — the only call the browser can make" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=3;strokeColor=#DD344C;fontSize=11;fontColor=#DD344C;fontStyle=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="dev" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_iam_lambda" value="Scopes to&lt;br&gt;one ARN" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#AAB7B8;fontSize=10;fontColor=#879596;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="iam" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_lambda_harness" value="InvokeHarness&lt;br&gt;holds event stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#ED7100;fontSize=10;fontColor=#B35900;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="lambda" target="harness">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_lambda_s3" value="get / put / list — users/ only" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#7AA116;fontSize=10;fontColor=#5C7A10;endArrow=blockThin;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="lambda" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_harness_s3" value="Loads skills at session start&lt;br&gt;users/ AND shared/" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#7AA116;fontSize=10;fontColor=#5C7A10;endArrow=blockThin;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="harness" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_harness_model" value="Model invoke" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#01A88D;fontSize=10;fontColor=#017F6B;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="harness" target="model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_harness_kms" value="Memory encryption" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#DD344C;fontSize=10;fontColor=#DD344C;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="harness" target="kms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_s3_kms" value="SSE-KMS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#DD344C;fontSize=10;fontColor=#DD344C;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="s3" target="kms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_harness_epif" value="Image pull, logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#8C4FFF;fontSize=10;fontColor=#8C4FFF;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="harness" target="ep_if">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_eps3_s3" value="Route to S3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#AAB7B8;fontSize=10;fontColor=#879596;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="ep_s3" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_harness_nat" value="Egress" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#8C4FFF;fontSize=10;fontColor=#8C4FFF;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="harness" target="nat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_nat_internet" value="Public web" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=2;strokeColor=#8C4FFF;fontSize=10;fontColor=#8C4FFF;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="nat" target="internet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_lambda_cw" value="Logs identity + key" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#E7157B;fontSize=10;fontColor=#E7157B;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="lambda" target="cw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_tf_s3" value="Uploads curated skills to shared/" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeWidth=1.5;strokeColor=#7AA116;fontSize=10;fontColor=#5C7A10;dashed=1;endArrow=blockThin;endFill=1;" edge="1" parent="1" source="tf" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend" value="&lt;b&gt;Connector colours&lt;/b&gt; — official AWS category palette&lt;br&gt;&lt;font color=&quot;#DD344C&quot;&gt;━━&lt;/font&gt; Auth and encryption&amp;nbsp;&amp;nbsp;&lt;font color=&quot;#7AA116&quot;&gt;━━&lt;/font&gt; Skill storage&amp;nbsp;&amp;nbsp;&lt;font color=&quot;#ED7100&quot;&gt;━━&lt;/font&gt; Compute&amp;nbsp;&amp;nbsp;&lt;font color=&quot;#01A88D&quot;&gt;━━&lt;/font&gt; Model&lt;br&gt;&lt;font color=&quot;#8C4FFF&quot;&gt;━━&lt;/font&gt; Networking and egress&amp;nbsp;&amp;nbsp;&lt;font color=&quot;#E7157B&quot;&gt;━━&lt;/font&gt; Observability&amp;nbsp;&amp;nbsp;&lt;font color=&quot;#AAB7B8&quot;&gt;╌╌&lt;/font&gt; Reference or routing only&lt;br&gt;&lt;br&gt;&lt;b&gt;Icon families:&lt;/b&gt; coloured tiles are AWS &lt;i&gt;service&lt;/i&gt; icons; flat glyphs are &lt;i&gt;resource&lt;/i&gt; icons — VPC endpoints, NAT, users.&lt;br&gt;Dashed lines carry no request traffic of their own; they say &quot;this governs that&quot;." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#AAB7B8;align=left;verticalAlign=top;spacing=10;fontSize=11;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="170" y="990" width="680" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="notes" value="&lt;b&gt;What the picture is claiming&lt;/b&gt;&lt;br&gt;&amp;#8226; The browser holds &lt;b&gt;one&lt;/b&gt; IAM permission: lambda:InvokeFunction on the proxy. It has no S3 permission at all, so there is no arrow from the developer to the bucket.&lt;br&gt;&amp;#8226; &lt;b&gt;shared/&lt;/b&gt; is reachable by the harness and by Terraform, never by the browser. A user observes it only through the agent&#39;s behaviour.&lt;br&gt;&amp;#8226; &lt;b&gt;shell is excluded&lt;/b&gt; from allowed_tools: a skill that can shell out could read shared/ and exfiltrate it.&lt;br&gt;&amp;#8226; The module creates no VPC, subnets, NAT or route tables — those stay with whoever owns the account." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF8E7;strokeColor=#ED7100;align=left;verticalAlign=top;spacing=10;fontSize=11;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="890" y="990" width="630" height="170" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

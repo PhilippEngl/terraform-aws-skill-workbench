@@ -6,7 +6,9 @@ You write a `SKILL.md` in the browser, save it, and immediately ask the agent to
 
 ## What it creates
 
-- An **AgentCore harness** in VPC mode, with managed long-term memory, the built-in file operations tool and the managed browser tool. `shell` is deliberately excluded: the workbench exists to exercise Skills, and a skill that can shell out can read the shared prefix and exfiltrate it.
+![Architecture](./docs/architecture.drawio.png)
+
+- An **AgentCore harness** in VPC mode, with managed long-term memory, the built-in file operations tool and the managed browser tool.
 - A **proxy Lambda** that is the security boundary. The browser can invoke this function and nothing else; every skill read, write and agent invocation goes through it.
 - An **S3 bucket with two prefixes**: `users/<identity>/` for skills a person authors, `shared/` for skills Terraform manages. A user can never read `shared/` directly, only observe its effect on the agent.
 - A **KMS key** encrypting both the bucket and the harness's memory.
@@ -63,12 +65,6 @@ make frontend TF_DIR=../my-infra
 
 The frontend is built by Vite, which bakes the Cognito and model configuration into the bundle at build time. That is why `make frontend` needs the infrastructure applied at least once, and why changing `agent_model_id` means rebuilding the frontend as well as re-applying.
 
-### Then verify the tool surface
-
-The first thing to do after an apply is ask the agent what tools it can call, and compare the answer with `allowed_tools`. A name in `allowed_tools` that matches nothing leaves the model with **no tools and no error** — it answers normally and fabricates results.
-
-`file_operations` has been observed working. `browser` is attached but has not been observed being used; treat the claim as unverified until you see it browse.
-
 ## Working on the module
 
 Every one of these runs with **no AWS credentials and nothing deployed**, which is the fast loop:
@@ -96,8 +92,6 @@ make scan-container      # adds the scanners local mode cannot install
 make scan-report         # summarise the last scan without re-scanning
 ```
 
-`make scan` is the one gate that needs no AWS credentials but does need the network: ASH is fetched with `uvx`, pinned to `ASH_VERSION`, and each scanner lands in its own isolated environment on first run. The only prerequisite is [uv](https://docs.astral.sh/uv/getting-started/installation/). Nothing is installed into the repository.
-
 **A finding fails the target.** ASH exits 2 when anything reaches `ASH_MIN_SEVERITY`, which defaults to `medium` — this is a gate, not a report. Loosen it per invocation rather than in the file:
 
 ```sh
@@ -105,11 +99,9 @@ make scan ASH_MIN_SEVERITY=critical
 make scan-container ASH_OCI_RUNNER=finch    # any OCI runtime works
 ```
 
-Local mode runs only what uv can install. cfn-nag needs Ruby, and Grype and Syft are separate binaries, so those three report `MISSING` until you install them or use `make scan-container`, which costs an image build the first time.
+## Deployment
 
-What is in scope is narrowed by [`.ash/.ash.yaml`](.ash/.ash.yaml), and the reason is worth knowing: ASH does not honour `.gitignore` for `.terraform/`, so without that file most findings come from the vendored source of `terraform-aws-modules/lambda/aws`, once per example that has been initialised. Nothing in it disables a scanner. Output lands in the gitignored `.ash/ash_output/`, and `make clean` removes it.
-
-Everything else above runs offline. The targets that touch AWS act on a **root configuration**, not on the module — a module is never applied directly. `TF_DIR` selects which one and defaults to `examples/vpc-and-endpoints-already-exist`:
+`TF_DIR` selects which one and defaults to `examples/vpc-and-endpoints-already-exist`:
 
 ```sh
 make plan                        # terraform plan in TF_DIR
